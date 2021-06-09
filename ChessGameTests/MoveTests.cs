@@ -33,13 +33,13 @@ namespace ChessGameTests
             var start = new Coord(0, 6);
             var end = new Coord(0, 5);
 
-            var pieceAtStart = game.Board.GetPiece(start);
-            Assert.IsNull(game.Board.GetPiece(end));
+            var pieceAtStart = game.Board.GetPieceFromCoord(start);
+            Assert.IsNull(game.Board.GetPieceFromCoord(end));
 
             var moveResult = game.Move(start, end);
-            var pieceAfterMove = game.Board.GetPiece(end);
+            var pieceAfterMove = game.Board.GetPieceFromCoord(end);
             Assert.AreEqual(pieceAtStart, pieceAfterMove);
-            Assert.IsNull(game.Board.GetPiece(start));
+            Assert.IsNull(game.Board.GetPieceFromCoord(start));
 
         }
         [TestMethod]
@@ -59,8 +59,8 @@ namespace ChessGameTests
             var start = new Coord(1, 3);
             var end = new Coord(2, 2);
 
-            var pieceOnStartCoord = game.Board.GetPiece(start);
-            var pieceToBeCaptured = game.Board.GetPiece(end);
+            var pieceOnStartCoord = game.Board.GetPieceFromCoord(start);
+            var pieceToBeCaptured = game.Board.GetPieceFromCoord(end);
 
             var moveResult = game.Move(start, end);
 
@@ -88,9 +88,9 @@ namespace ChessGameTests
             var game = GenerateInProgressGameState();
             var start = new Coord(7, 6);
             var end = new Coord(7, 4);
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
                 game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -112,9 +112,9 @@ namespace ChessGameTests
             var start = new Coord(3, 1);
             var end = new Coord(3, 2);
 
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
                             game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -127,10 +127,10 @@ namespace ChessGameTests
             var game = GenerateInProgressGameState();
         
             game.Move(new Coord(2, 2), new Coord(2, 3));
-            var startPiece = game.Board.GetPiece(new Coord(2, 3));
+            var startPiece = game.Board.GetPieceFromCoord(new Coord(2, 3));
 
             //confirm no diagonal piece present
-            var pieceToCapture = game.Board.GetPiece(new Coord(1, 4));
+            var pieceToCapture = game.Board.GetPieceFromCoord(new Coord(1, 4));
             Assert.IsNull(pieceToCapture);
 
             game.Move(new Coord(2, 3), new Coord(1, 4));
@@ -144,14 +144,14 @@ namespace ChessGameTests
             var game = GenerateInProgressGameState();
 
             game.Move(new Coord(3, 1), new Coord(3, 3));
-            var startPiece = game.Board.GetPiece(new Coord(3, 3));
+            var startPiece = game.Board.GetPieceFromCoord(new Coord(3, 3));
       
             //confirm there is a diagonal piece elidgible for capture
-            var pieceToCapture = game.Board.GetPiece(new Coord(2, 4));
+            var pieceToCapture = game.Board.GetPieceFromCoord(new Coord(2, 4));
             Assert.IsNotNull(pieceToCapture);
 
             game.Move(new Coord(3, 3), new Coord(2, 4));
-            Assert.AreEqual(startPiece, game.Board.GetPiece(new Coord(2, 4)));
+            Assert.AreEqual(startPiece, game.Board.GetPieceFromCoord(new Coord(2, 4)));
         }
 
         [TestMethod]
@@ -161,9 +161,9 @@ namespace ChessGameTests
             var start = new Coord(1, 7);
             var end = new Coord(0,5);
 
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
                             game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -176,9 +176,9 @@ namespace ChessGameTests
             var start = new Coord(1, 7);
             var end = new Coord(3, 6);
 
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
             game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -191,9 +191,9 @@ namespace ChessGameTests
             var start = new Coord(5, 0);
             var end = new Coord(3, 2);
 
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
             game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -206,9 +206,9 @@ namespace ChessGameTests
 
             var start = new Coord(0, 7);
             var end = new Coord(1, 7);
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
             game.Move(start, end);
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -218,11 +218,11 @@ namespace ChessGameTests
             var start = new Coord(0, 7);
             var end = new Coord(0, 5);
 
-            var startPiece = game.Board.GetPiece(start);
+            var startPiece = game.Board.GetPieceFromCoord(start);
             //move pawn
             game.Move(new Coord(0, 6), new Coord(0, 4));
 
-            var endPiece = game.Board.GetPiece(end);
+            var endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -239,7 +239,7 @@ namespace ChessGameTests
             game.Move(new Coord(3, 0), new Coord(2, 1));
 
            //king
-            var startPiece = game.Board.GetPiece(new Coord(4,0));
+            var startPiece = game.Board.GetPieceFromCoord(new Coord(4,0));
             
             //move horizontally 1 forward
             game.Move(new Coord(4, 0), new Coord(3, 0));
@@ -252,7 +252,7 @@ namespace ChessGameTests
             game.Move(new Coord(4, 2), new Coord(4, 1));
             //move diagonally
             game.Move(new Coord(4, 1), new Coord(3, 0));
-            Assert.AreEqual(startPiece, game.Board.GetPiece(new Coord(3, 0)));
+            Assert.AreEqual(startPiece, game.Board.GetPieceFromCoord(new Coord(3, 0)));
         }
 
         [TestMethod]
@@ -269,7 +269,7 @@ namespace ChessGameTests
             game.Move(new Coord(3, 0), new Coord(2, 1));
 
             //king
-            var startPiece = game.Board.GetPiece(new Coord(4, 0));
+            var startPiece = game.Board.GetPieceFromCoord(new Coord(4, 0));
 
             //move horizontally 2 forward
             game.Move(new Coord(4, 0), new Coord(4, 2));
@@ -287,18 +287,18 @@ namespace ChessGameTests
             var start = new Coord(3, 0);
             var end = new Coord(3, 1);
 
-            var startPiece = game.Board.GetPiece(start);
-            var endPiece = game.Board.GetPiece(end);
+            var startPiece = game.Board.GetPieceFromCoord(start);
+            var endPiece = game.Board.GetPieceFromCoord(end);
             Assert.IsNull(endPiece);
             //move forward one square
             game.Move(start, end);
-            endPiece = game.Board.GetPiece(end);
+            endPiece = game.Board.GetPieceFromCoord(end);
             Assert.AreEqual(startPiece, endPiece);
 
             //move backwards one square
-            startPiece= game.Board.GetPiece(new Coord(3, 1));
+            startPiece= game.Board.GetPieceFromCoord(new Coord(3, 1));
             game.Move(new Coord(3, 1), new Coord(3, 0));
-            endPiece = game.Board.GetPiece(new Coord(3, 0));
+            endPiece = game.Board.GetPieceFromCoord(new Coord(3, 0));
             Assert.AreEqual(startPiece, endPiece);
         }
         [TestMethod]
@@ -312,18 +312,18 @@ namespace ChessGameTests
             var start = new Coord(3, 0);
             var end = new Coord(3, 3);
 
-            var startPiece = game.Board.GetPiece(start);
-            var endPiece = game.Board.GetPiece(end);
+            var startPiece = game.Board.GetPieceFromCoord(start);
+            var endPiece = game.Board.GetPieceFromCoord(end);
             Assert.IsNull(endPiece);
             //move forward 3 squares
             game.Move(start, end);
-            endPiece = game.Board.GetPiece(end);
+            endPiece = game.Board.GetPieceFromCoord(end);
             Assert.AreEqual(startPiece, endPiece);
 
             //move backwards 2 squares
-            startPiece = game.Board.GetPiece(new Coord(3, 3));
+            startPiece = game.Board.GetPieceFromCoord(new Coord(3, 3));
             game.Move(new Coord(3, 3), new Coord(3, 1));
-            endPiece = game.Board.GetPiece(new Coord(3, 1));
+            endPiece = game.Board.GetPieceFromCoord(new Coord(3, 1));
             Assert.AreEqual(startPiece, endPiece);
         }
         [TestMethod]
@@ -333,12 +333,12 @@ namespace ChessGameTests
             var start = new Coord(3, 0);
             var end = new Coord(2, 1);
 
-            var startPiece = game.Board.GetPiece(start);
-            var endPiece = game.Board.GetPiece(end);
+            var startPiece = game.Board.GetPieceFromCoord(start);
+            var endPiece = game.Board.GetPieceFromCoord(end);
             Assert.IsNull(endPiece);
 
             game.Move(start, end);
-            endPiece = game.Board.GetPiece(end);
+            endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -349,12 +349,12 @@ namespace ChessGameTests
             var start = new Coord(3, 0);
             var end = new Coord(1, 2);
 
-            var startPiece = game.Board.GetPiece(start);
-            var endPiece = game.Board.GetPiece(end);
+            var startPiece = game.Board.GetPieceFromCoord(start);
+            var endPiece = game.Board.GetPieceFromCoord(end);
             Assert.IsNull(endPiece);
 
             game.Move(start, end);
-            endPiece = game.Board.GetPiece(end);
+            endPiece = game.Board.GetPieceFromCoord(end);
 
             Assert.AreEqual(startPiece, endPiece);
         }
@@ -381,15 +381,15 @@ namespace ChessGameTests
             var end = new Coord(2, 2);
 
         
-            var pieceAtStartCoord = game.Board.GetPiece(start);
-            var pieceAtEndCoord = game.Board.GetPiece(end);
+            var pieceAtStartCoord = game.Board.GetPieceFromCoord(start);
+            var pieceAtEndCoord = game.Board.GetPieceFromCoord(end);
             Assert.IsFalse(game.PlayerWhite.CapturedList.Contains(pieceAtEndCoord));
 
             var moveResult = game.Move(start, end);
             
             Assert.IsTrue(game.PlayerWhite.CapturedList.Contains(moveResult.CapturedPiece));
             Assert.IsTrue(game.PlayerBlack.CapturedList.Count == 0);
-            Assert.AreEqual(pieceAtStartCoord, game.Board.GetPiece(end));
+            Assert.AreEqual(pieceAtStartCoord, game.Board.GetPieceFromCoord(end));
 
         }
 
@@ -400,15 +400,15 @@ namespace ChessGameTests
             var start = new Coord(2, 2);
             var end = new Coord(1, 3);
 
-            var pieceAtStartCoord = game.Board.GetPiece(start);
-            var pieceAtEndCoord = game.Board.GetPiece(end);
+            var pieceAtStartCoord = game.Board.GetPieceFromCoord(start);
+            var pieceAtEndCoord = game.Board.GetPieceFromCoord(end);
             Assert.IsFalse(game.PlayerBlack.CapturedList.Contains(pieceAtEndCoord));
 
             var moveResult = game.Move(start, end);
 
             Assert.IsTrue(game.PlayerBlack.CapturedList.Contains(moveResult.CapturedPiece));
             Assert.IsTrue(game.PlayerWhite.CapturedList.Count == 0);
-            Assert.AreEqual(pieceAtStartCoord, game.Board.GetPiece(end));
+            Assert.AreEqual(pieceAtStartCoord, game.Board.GetPieceFromCoord(end));
         }
 
         [TestMethod]
@@ -436,7 +436,7 @@ namespace ChessGameTests
             // w pawn capture b pawn
             game.Move(new Coord(7, 6), new Coord(7, 4));
             game.Move(new Coord(6, 1), new Coord(6, 3));
-            var pawnToCapture = game.Board.GetPiece(new Coord(6, 3));
+            var pawnToCapture = game.Board.GetPieceFromCoord(new Coord(6, 3));
            var moveResult = game.Move(new Coord(7, 4), new Coord(6, 3));
             Assert.AreSame(moveResult.CapturedPiece, pawnToCapture);
             Assert.IsTrue(game.PlayerWhite.CapturedList.Contains(pawnToCapture));
@@ -453,7 +453,7 @@ namespace ChessGameTests
            var promotionMoveResult = game.Move(new Coord(6, 6), new Coord(6, 7)); // back pawn promotion
 
             Assert.IsNull(promotionMoveResult.CapturedPiece);
-            Assert.AreSame(promotionMoveResult.PawnToPromote, game.Board.GetPiece(new Coord(6, 7)));
+            Assert.AreSame(promotionMoveResult.PawnToPromote, game.Board.GetPieceFromCoord(new Coord(6, 7)));
             Assert.AreEqual(game.PlayerWhite.CapturedList.Count, 2);
             Assert.AreEqual(game.PlayerBlack.CapturedList.Count, 1);
 

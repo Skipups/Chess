@@ -81,14 +81,15 @@ namespace ChessGame
 
         }
 
+        [DataMember]
+        public Guid gameID;
+
         public GameState(string player1Name, string player2Name, Board board)
         {
-            //create players and assign piece color
             PlayerWhite = new Player(player1Name, true);
             PlayerBlack = new Player(player2Name, false);
             _board = board;
             TurnWhite = true;
-
         }
         private GameState()
         {
@@ -96,16 +97,21 @@ namespace ChessGame
         }
         public static GameState StartNewGame(string player1Name, string player2Name)
         {
-            //create players and assign piece color
             var toReturn = new GameState();
 
             toReturn.PlayerWhite = new Player(player1Name, true);
             toReturn.PlayerBlack = new Player(player2Name, false);
             toReturn._board = ChessGame.Board.CreateNewGame();
             toReturn.TurnWhite = true;
+            toReturn.gameID = GenerateGuid();
             return toReturn;
-
         }
+
+        public static Guid GenerateGuid()
+        {
+            return new Guid();
+        }
+
         public void ShowPlayers()
         {
                 Console.WriteLine($"Player1: {PlayerWhite.Name}, Color:{PlayerWhite.White} and Player2: {PlayerBlack.Name}, Color:{PlayerBlack.White}.");
@@ -121,9 +127,9 @@ namespace ChessGame
                 Console.WriteLine($"{PlayerBlack.Name}'s Turn! Select the black piece you want to move");
             }
         }
-        public MoveResult Move(Coord start, Coord end)
+        public MoveResult Move(int pieceId, Coord end)
         {
-
+            var start = _board.GetStartCoordFromPieceId(pieceId);
             var moveResult = _board.Move(start, end);
            
             if (moveResult.CapturedPiece != null)
@@ -174,18 +180,16 @@ namespace ChessGame
                     gameUI.DisplayReminderKingInCheck(CurrentTurnPlayer);
                     gameUI.DisplayCoordsThatHaveKingInCheck(listOfCoordsThatHaveKingInCheck);
                 }
-                
                     //ask user for move
                     var (coordStart, coordEnd) = gameUI.GetMove(this, CurrentTurnPlayer);
 
                 try
                 {
-                    var moveResult = this.Move(coordStart, coordEnd);
-
+                    var pieceId = _board.GetPieceIdFromCoord(coordStart);
+                    var moveResult = this.Move(pieceId, coordEnd);
                     //check for capture
                     if (moveResult.CapturedPiece != null)
                     {
-                       
                         gameUI.DisplayCapturedPiece(moveResult.CapturedPiece);
                     }
 
@@ -219,7 +223,7 @@ namespace ChessGame
             }
         }
 
-        public bool IsCastlingPossibleAndExecuted( IGameUI gameUI)
+        public bool IsCastlingPossibleAndExecuted(IGameUI gameUI)
         {
             //currentTurn player in check
             var listOfCoordsThatHaveKingInCheck = Board.PiecesThatHaveKingInCheck(!CurrentTurnPlayer.White);
@@ -228,10 +232,10 @@ namespace ChessGame
                 return false;
             }
             var possibleCastlingOptions = Board.TryCastle(CurrentTurnPlayer);
-           if (possibleCastlingOptions.Count > 0)
+            if (possibleCastlingOptions.Count > 0)
             {
-               var coordSelection = gameUI.GetCastlingMove(possibleCastlingOptions);
-                if(coordSelection != null)
+                var coordSelection = gameUI.GetCastlingMove(possibleCastlingOptions);
+                if (coordSelection != null)
                 {
                     return Board.ExecuteCastlingMove(coordSelection);
                 }
@@ -239,6 +243,5 @@ namespace ChessGame
 
             return false;
         }
-
     }
 }

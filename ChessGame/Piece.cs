@@ -27,10 +27,15 @@ namespace ChessGame
     {
         [DataMember]
         public bool White { get; set; }
+
         [DataMember]
         public char FirstLetter { get; }
+
         [DataMember]
         public bool HasBeenMoved { get; set; }
+
+        [DataMember]
+        public int PieceId { get; }
 
         [IgnoreDataMember]
         public string DisplayPieceInfo
@@ -58,11 +63,12 @@ namespace ChessGame
         public virtual ICastlable IsPieceCastlable { get { return null; } }
         abstract public List<Coord> GetAllpossibleMoveCoordinates(Coord start);
 
-        public Piece(bool white, char firstLetter)
+        public Piece(bool white, char firstLetter, int pieceId)
         {
             White = white;
             FirstLetter = firstLetter;
             HasBeenMoved = false;
+            PieceId = pieceId;
         }
         abstract public bool ValidateMove(Coord start, Coord end, Piece piece=null);
     }
@@ -72,7 +78,7 @@ namespace ChessGame
         private int moveDirectionMultiplier;
         private int startingY;
 
-        public Pawn(bool color) : base(color,'P')
+        public Pawn(bool color, int pieceId) : base(color,'P', pieceId)
         {
             if (color)
             {
@@ -151,7 +157,7 @@ namespace ChessGame
     class Knight : Piece
     {
 
-        public Knight(bool color) : base(color, 'k')
+        public Knight(bool color, int pieceId) : base(color,'k', pieceId)
         { 
         }
         public override bool CheckForPiecesInPath { get { return false; } }
@@ -183,8 +189,8 @@ namespace ChessGame
     [DataContract()]
     class King : Piece, ICheckable
         {
-            public King(bool color) : base(color,'K')
-            {
+            public King(bool color, int pieceId) : base(color,'K', pieceId)
+        {
             }
         public override ICheckable IsPieceCheckable { get { return this; } }
 
@@ -221,8 +227,8 @@ namespace ChessGame
     [DataContract()]
     class Queen : Piece
         {
-           public Queen(bool color) : base(color,'Q')
-            {
+           public Queen(bool color, int pieceId) : base(color,'Q', pieceId)
+        {
             }
         // horizontal, diagonal, and vertical moves
         public override bool ValidateMove(Coord start, Coord end, Piece piece = null)
@@ -252,8 +258,8 @@ namespace ChessGame
     [DataContract()]
     class Bishop : Piece
      {
-            public Bishop(bool color) : base(color,'B')
-            {
+            public Bishop(bool color, int pieceId) : base(color,'B', pieceId)
+        {
             }
         //diagonal moves
         public override bool ValidateMove(Coord start, Coord end, Piece piece = null)
@@ -283,8 +289,8 @@ namespace ChessGame
     [DataContract()]
     class Rook : Piece, ICastlable
         {
-            public Rook(bool color) : base(color,'R' )
-            {
+            public Rook(bool color, int pieceId) : base(color, 'R', pieceId)
+        {
             }
         public  override ICastlable IsPieceCastlable { get { return this; } }
         //horizontal and vertical moves

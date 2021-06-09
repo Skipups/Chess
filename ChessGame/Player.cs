@@ -15,10 +15,16 @@ namespace ChessGame
 
         [DataMember]
         public string Name { get; }
+
         [DataMember]
         public bool White { get; }
+
         [DataMember]
         public bool IsInCheck { get; set; }
+
+        [DataMember]
+        public int PlayerId { get; }
+        
 
 
         public Player(string name, bool white)
@@ -27,26 +33,9 @@ namespace ChessGame
             White = white;
             CapturedList = new List<Piece>();
             IsInCheck = false;
+            PlayerId = white == true ? 0 : 1;
            
 
         }
-     
-
-        //drawListcaptured list without pawns
-
-       
     }
 }
-
-//public void DrawCapturedList()
-//{
-//    if (this.CapturedList.Count == 0) return;
-
-//    StringBuilder line = new StringBuilder();
-//    line.Append("    "); // 
-//    line.Append(($"{ this.Name}'s captured pieces: "));
-//    string commaSeparated = string.Join(",", this.CapturedList.Keys.Select(key => key.DisplayPieceInfo));
-//    line.Append(commaSeparated);
-//    Console.Write(line);
-//    Console.WriteLine();
-//}

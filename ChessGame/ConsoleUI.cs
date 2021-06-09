@@ -92,7 +92,7 @@ namespace ChessGame
                     }
 
 
-                    Piece piece = board.GetPiece(new Coord(x, y));
+                    Piece piece = board.GetPieceFromCoord(new Coord(x, y));
                     //PieceCoordMap.TryGetValue(new Coord(x, y), out piece);
 
                     string cellInfo = PrintCell(x, y, color, piece);
@@ -321,8 +321,6 @@ namespace ChessGame
 
         public void SaveGame(GameState game)
         {
-            //string json = JsonConvert.SerializeObject(game, Formatting.Indented, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-
             string json = JsonConvert.SerializeObject(game, Formatting.Indented, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Objects,
@@ -353,9 +351,9 @@ namespace ChessGame
                     Console.WriteLine("Saved game with name \"{0}\" already exists. Enter a new name", userInput);
                 }
             }
-            //System.IO.File.WriteAllText("C:\\temp\\game2.chess", json);
-            //String path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            
         }
+
        public string LoadGame(GameState game)
         {
             var targetDirectory = Path.Combine(Environment.GetFolderPath(
@@ -391,16 +389,8 @@ namespace ChessGame
                 }
             }
 
-
-
             string json = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), selectedFile));
             return json;
-
-          
-
-
-            //string json2 = System.IO.File.ReadAllText("C:\\temp\\game.chess");
-            //game = JsonConvert.DeserializeObject<GameState>(json2, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
         }
     }
     }
