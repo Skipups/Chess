@@ -43,6 +43,21 @@ namespace ChessGame
             Console.WriteLine($"{currentPlayerTurn.Name} you are in check");
 
         }
+        public void ShowPlayers(Player player1, Player player2)
+        {
+            Console.WriteLine($"Player1: {player1.Name}, Color:{player1.White} and Player2: {player2.Name}, Color:{player2.White}.");
+        }
+        public void ShowWhoseTurn(GameState game)
+        {
+            if (game.TurnWhite)
+            {
+                Console.WriteLine($"{game.PlayerWhite.Name}'s Turn! Select the white piece you want to move");
+            }
+            else
+            {
+                Console.WriteLine($"{game.PlayerBlack.Name}'s Turn! Select the black piece you want to move");
+            }
+        }
         public void DisplayCoordsThatHaveKingInCheck(List<Coord> listOfCoordsTheHaveKingInCheck)
         {
             StringBuilder line = new StringBuilder();
@@ -151,12 +166,12 @@ namespace ChessGame
             Console.WriteLine(line);
         }
 
-        public Tuple<Coord, Coord> GetMove(GameState game, Player player)
+        public Tuple<Piece, Coord> GetMove(GameState game, Player player)
         {
             Console.WriteLine($"{player.Name}'s turn!");
 
             DrawCapturedList(game.PlayerBlack);
-           DrawBoard(game.Board);
+            DrawBoard(game.Board);
             DrawCapturedList(game.PlayerWhite);
 
             Console.WriteLine("Type the start coordinate of the piece you want to move: \nExample type 0,6 ");
@@ -187,14 +202,14 @@ namespace ChessGame
                 endCoordParsed = Menu.ParseMoveString(endCoord);
                 endCoordCantBeParsed = endCoordParsed.Equals(Coord.InvalidCoordinate);
             }
-
-            return new Tuple<Coord, Coord>(startCoordParsed, endCoordParsed);
+            var startPiece = game.Board.GetPieceFromCoord(startCoordParsed);
+            return new Tuple<Piece, Coord>(startPiece, endCoordParsed);
 
         }
 
+  
         public Piece GetPieceToPromote(GameState gamestate, Player player, List<Piece> capturedPieces)
         {
-           
                 var pieceDict = new SortedDictionary<int, Piece>();
                 foreach (var capPiece in capturedPieces)
                 {
@@ -206,7 +221,6 @@ namespace ChessGame
                 Piece toReturn = null;
                 while (toReturn == null)
                 {
-                    // int count = this.CapturedList.Count();
                     StringBuilder line = new StringBuilder();
                     line.Append("    "); // 
 
@@ -214,6 +228,7 @@ namespace ChessGame
                     {
                         line.Append($"{kvp.Key}. {kvp.Value.DisplayPieceInfo} ");
                     }
+
                     Console.WriteLine(line);
                     Console.WriteLine("Pawn Promotion! Type the number of the piece you want to promote:");
                     var pieceNumberSelection = Console.ReadLine();
@@ -223,6 +238,7 @@ namespace ChessGame
                         Console.WriteLine("Invalid selection");
                     }
                 }
+
                 return toReturn;
         }
 
@@ -278,16 +294,18 @@ namespace ChessGame
             }
         }
 
-        public  CastleCoord GetCastlingMove(List<CastleCoord> possibleCastlingOptions)
+        public CastlePieces GetCastlingMove(List<CastlePieces> possibleCastlingOptions, GameState game)
         {
             while (true)
             if(possibleCastlingOptions.Count == 1)
             {
-                Console.WriteLine($"Would you like to execute castling with the King and Rook on coords {possibleCastlingOptions[0].KingCoord} and {possibleCastlingOptions[0].RookCoord}. Type 'y' to execute move, else type 'n' to perform other move");
+                    var kingCoord = game.Board.GetCoordFromPiece(possibleCastlingOptions[0].King);
+                    var rookCoord = game.Board.GetCoordFromPiece(possibleCastlingOptions[0].Rook);
+                    Console.WriteLine($"Would you like to execute castling with the King and Rook on coords {kingCoord} and {rookCoord}. Type 'y' to execute move, else type 'n' to perform other move");
                 var userInput = Console.ReadLine();
                 if (userInput == "y")
                 {
-                    return new CastleCoord(possibleCastlingOptions[0].KingCoord, possibleCastlingOptions[0].RookCoord);
+                        return possibleCastlingOptions[0];
                 }
                 else if (userInput == "n")
                     {
@@ -297,19 +315,22 @@ namespace ChessGame
                 }
             else
             {
-                Console.WriteLine($"You have 2 castling options.");
-                Console.WriteLine($"Option 1 with the King and Rook on coords {possibleCastlingOptions[0].KingCoord}and {possibleCastlingOptions[0].RookCoord}. Type 'y1'. ");
-                Console.WriteLine($"Option 2 with the King and Rook on coords {possibleCastlingOptions[1].KingCoord}and {possibleCastlingOptions[1].RookCoord}. Type '2'."); 
+                    var kingCoord = game.Board.GetCoordFromPiece(possibleCastlingOptions[0].King);
+                    var rookCoord1 = game.Board.GetCoordFromPiece(possibleCastlingOptions[0].Rook);
+                    var rookCoord2 = game.Board.GetCoordFromPiece(possibleCastlingOptions[1].Rook);
+                    Console.WriteLine($"You have 2 castling options.");
+                Console.WriteLine($"Option 1 with the King and Rook on coords {kingCoord}and {rookCoord1}. Type 'y1'. ");
+                Console.WriteLine($"Option 2 with the King and Rook on coords {kingCoord}and {rookCoord2}. Type '2'."); 
                 Console.WriteLine($"Type '0' to exist castling and to perform other move.");
 
                     var userInput = Console.ReadLine();
                     if (userInput == "y1")
                     {
-                        return new CastleCoord(possibleCastlingOptions[0].KingCoord, possibleCastlingOptions[0].RookCoord);
+                        return possibleCastlingOptions[0];
                     }
                     else if (userInput == "y2")
                     {
-                        return new CastleCoord(possibleCastlingOptions[1].KingCoord, possibleCastlingOptions[1].RookCoord);
+                        return possibleCastlingOptions[1];
                     }
                     else if (userInput == "n")
                     {

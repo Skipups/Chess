@@ -12,20 +12,19 @@ namespace ChessGame
         bool IsValidMoveCoord(Coord coord, bool isStartCord, bool turnWhite);
         Piece GetPieceFromCoord(Coord coord);
         int GetPieceIdFromCoord(Coord coord);
-        Coord GetStartCoordFromPieceId(int pieceId);
-        List<CastleCoord> TryCastle(Player currentPlayer);
+        Coord GetCoordFromPiece(Piece piece);
+        List<CastlePieces> TryCastle(Player currentPlayer);
         List<Coord> PiecesThatHaveKingInCheck(bool playerColor);
-        bool ExecuteCastlingMove(CastleCoord startCoord);
+        bool ExecuteCastlingMove(CastlePieces startCoord);
         bool CheckMate(Player player);
+        void PopulatePieceToIdMap(List<Piece> capturedPieceList1, List<Piece> capturedPieceList2);
     }
     [DataContract()]
     public class Board : IBoard
     {
         [DataMember]
         private Dictionary<Coord, Piece> PieceCoordMap;
-        [DataMember]
-        public static Dictionary<Piece, int> PieceIdMap;
-        public static Dictionary<int, Piece> IdPieceMap;
+        public Dictionary<int, Piece> IdPieceMap;
         private const string Horizontal = "+--------";
         private const string Vertical = "| ";
         private const int Size = 8;
@@ -33,82 +32,38 @@ namespace ChessGame
         public Board()
         {
             PieceCoordMap = new Dictionary<Coord, Piece>();
-            PieceIdMap = new Dictionary<Piece, int>();
             IdPieceMap = new Dictionary<int, Piece>();
         }
 
-        //public void DrawBoard()
-        //{
-        //    Console.WriteLine();
-        //    Console.WriteLine("Board");
-        //    Console.WriteLine("      0        1        2        3        4        5        6        7"); // column number
-        //    for (int y = 0; y < Size; y++)
-        //    {
-        //        StringBuilder nextLine = new StringBuilder();
-        //        nextLine.Append("  "); // move board left 2 spaces
-        //        for (int x = 0; x < Size; x++)
-        //        {
-        //            nextLine.Append(Horizontal); // write horizontal part of the cell
-        //        }
-        //        //Console.Write("+\n");  // add + at the end of row
-        //        nextLine.Append("+\n");
-        //        for (int x = 0; x < Size; x++)
-        //        {
-        //            if (x == 0)
-        //            {
-
-        //                nextLine.Append(y + " "); //row number
-        //            }
-
-        //            char color = 'B';   // color of the celll
-        //            if ((y + x) % 2 == 0)
-        //            {
-        //                color = 'W';
-        //            }
-
-        //            Piece piece;
-        //            PieceCoordMap.TryGetValue(new Coord(x, y), out piece);
-
-        //            string cellInfo = PrintCell(x, y, color, piece);
-        //            nextLine.Append(Vertical + cellInfo + " ");
-        //        }
-        //        nextLine.Append("|");
-        //        Console.WriteLine(nextLine);
-        //    }
-        //    // add bottom border
-        //    StringBuilder border = new StringBuilder();
-        //    border.Append("  ");
-
-        //    for (int c = 0; c < Size; c++)
-        //    {
-
-        //        border.Append(Horizontal);
-        //    }
-        //    border.Append("+\n\n");
-        //    Console.WriteLine(border);
-
-        //}
-        public static Board CreateNewGame()
+        public static Board CreateNewGame(List<Piece> capturedPieceList1, List<Piece> capturedPieceList2)
         {
             var toReturn = new Board();
             toReturn.PopulatePieceCoordMap();
-            toReturn.PopulatePieceToIdMaps();
+            toReturn.PopulatePieceToIdMap(capturedPieceList1, capturedPieceList2);
             return toReturn;
         }
 
-        private void PopulatePieceToIdMaps()
+        public void PopulatePieceToIdMap(List<Piece> capturedPieceList1, List<Piece> capturedPieceList2)
         {
+            IdPieceMap.Clear();
             foreach (var kvp in PieceCoordMap)
             {
                 Piece piece = kvp.Value;
                 int id = piece.PieceId;
-                PieceIdMap.Add(piece, id);
                 IdPieceMap.Add(id, piece);
             }
+            foreach(var piece in capturedPieceList1)
+            {
+                IdPieceMap.Add(piece.PieceId, piece);
+            }
+            foreach (var piece in capturedPieceList2)
+            {
+                IdPieceMap.Add(piece.PieceId, piece);
+            }
         }
-        public Coord GetStartCoordFromPieceId(int pieceId)
-        {
-            var piece = IdPieceMap[pieceId];
+
+        public Coord GetCoordFromPiece(Piece piece)
+        { 
             Coord toReturn = new Coord(-1, -1);
             foreach (var kvp in PieceCoordMap)
             {
@@ -120,6 +75,7 @@ namespace ChessGame
 
             return toReturn;
         }
+
         public int GetPieceIdFromCoord(Coord coord)
         {
             Piece piece = null;
@@ -147,7 +103,6 @@ namespace ChessGame
                 {
 
                 }
-
             }
             return listPieceResult;
         }
@@ -166,24 +121,24 @@ namespace ChessGame
             throw new InvalidOperationException("Couldn't find King");
         }
 
-        private List<Coord> GetCoordsOfRooksThatHaveNotMoved(bool isWhite)
+        private List<Tuple<Coord,Piece>> GetUnmovedRookInfo(bool isWhite)
         {
-            var unMovedRookCoords = new List<Coord>(2);
+            var unmovedRookInfo = new List<Tuple<Coord, Piece>>(2);
             foreach (var kvp in PieceCoordMap)
             {
                 if (kvp.Value.IsPieceCastlable != null && !kvp.Value.HasBeenMoved)
                 {
                     if (kvp.Value.White == isWhite)
                     {
-                        unMovedRookCoords.Add(kvp.Key);
+                        unmovedRookInfo.Add(Tuple.Create<Coord,Piece>(kvp.Key,kvp.Value));
                     }
                 }
             }
-            return unMovedRookCoords;
+            return unmovedRookInfo;
         }
-        public List<CastleCoord> TryCastle(Player currentPlayer)
+        public List<CastlePieces> TryCastle(Player currentPlayer)
         {
-            var verifiedCastlingCoordPairs = new List<CastleCoord>(2);
+            var verifiedCastlingPiecePairs = new List<CastlePieces>(2);
 
             //if have piece that hasn't moved and checkable
             var kingCoord = GetKingCoord(currentPlayer.White);
@@ -191,25 +146,28 @@ namespace ChessGame
             PieceCoordMap.TryGetValue(kingCoord, out king);
             if (king.HasBeenMoved)
             {
-                return verifiedCastlingCoordPairs;
+                return verifiedCastlingPiecePairs;
             }
+
+            Piece rook;
+            PieceCoordMap.TryGetValue(kingCoord, out rook);
             //if we have pieces that haven't moved and are castlable
-            var unMovedRookCoords = GetCoordsOfRooksThatHaveNotMoved(currentPlayer.White);
-            if (unMovedRookCoords.Count == 0)
+            var unmovedRookInfo = GetUnmovedRookInfo(currentPlayer.White);
+            if (unmovedRookInfo.Count == 0)
             {
-                return verifiedCastlingCoordPairs;
+                return verifiedCastlingPiecePairs;
             }
 
             //is the path between them clear
-            foreach (var rookCoord in unMovedRookCoords)
+            foreach (var rookTuple in unmovedRookInfo)
             {
-                if (IsPathClear(kingCoord, rookCoord))
+                if (IsPathClear(kingCoord, rookTuple.Item1))
                 {
-                    verifiedCastlingCoordPairs.Add(new CastleCoord(kingCoord, rookCoord));
+                    verifiedCastlingPiecePairs.Add(new CastlePieces(king, rookTuple.Item2));
                 }
             }
 
-            return verifiedCastlingCoordPairs;
+            return verifiedCastlingPiecePairs;
         }
 
         private IEnumerable<KeyValuePair<Coord, Piece>> GetPiecesForColor(bool isWhite)
@@ -247,7 +205,6 @@ namespace ChessGame
                     {
 
                     }
-
                 }
             }
             return true;
@@ -264,15 +221,12 @@ namespace ChessGame
             {
                 moveResult.CapturedPiece.HasBeenMoved = true;
             }
-
             if (moveResult.MovedPiece != null)
             {
                 moveResult.MovedPiece.HasBeenMoved = true;
             }
 
-            //updateMap
             UpdateMap(start, end, moveResult.MovedPiece);
-
             return moveResult;
         }
         public MoveResult CalculateMoveResult(Coord start, Coord end)
@@ -286,8 +240,6 @@ namespace ChessGame
             {
                 throw new InvalidMoveException("Start and end coordinates must be different");
             }
-
-            //is start piece their color?
 
             //ask start piece if it can move that many squares
             if (moveResult.MovedPiece != null)
@@ -304,8 +256,6 @@ namespace ChessGame
                 throw new InvalidMoveException("Start and end pieces can't be the same color");
             }
 
-
-
             //does start piece care about pathCheck
             //yes- is the path clear?
             if (moveResult.MovedPiece.CheckForPiecesInPath)
@@ -314,28 +264,21 @@ namespace ChessGame
                 {
                     throw new InvalidMoveException("The path is not clear to make this move.");
                 }
-
             }
-
 
             IPromotablePiece startPiecePromotable = moveResult.MovedPiece.IsPiecePromotable;
             if (startPiecePromotable != null && startPiecePromotable.IsValidPromotionPosition(end))
             {
                 //are we in the final opposite colors row
                 moveResult.PawnToPromote = moveResult.MovedPiece;
-
             }
-
 
             moveResult.CapturedPiece = endPiece;
             return moveResult;
         }
         protected internal void Promote(Coord end, Piece pieceToPromote)
         {
-
             var start = end;
-
-            //updateMap
             UpdateMap(start, end, pieceToPromote);
         }
 
@@ -373,7 +316,6 @@ namespace ChessGame
             {
                 return false;
             }
-
             Piece piece = GetPieceFromCoord(coord);
             if (isStartCord && piece == null)
             {
@@ -383,7 +325,6 @@ namespace ChessGame
             {
                 return false;
             }
-
             if (!turnWhite && isStartCord && piece.White)
             {
                 return false;
@@ -395,7 +336,6 @@ namespace ChessGame
         private bool IsWithInBoard(Coord coord)
         {
             return !(coord.X < 0 || coord.X > 7 || coord.Y < 0 || coord.Y > 7);
-
         }
 
         //doesn't check start or end coord
@@ -421,55 +361,55 @@ namespace ChessGame
             PieceCoordMap.TryGetValue(coordinate, out piece);
             return piece ?? null;
         }
-        //Mike: how to specify king coord is first
-        public bool ExecuteCastlingMove(CastleCoord startCoords)
+  
+        public bool ExecuteCastlingMove(CastlePieces pieces)
         {
+            Tuple<Coord, Coord> endCoords = null;
+            var kingCoord= this.GetCoordFromPiece(pieces.King);
+            var rookCoord = this.GetCoordFromPiece(pieces.Rook);
+
             //are we castling kingside or queenside
-            var numXCoordsBetween = Math.Abs(startCoords.KingCoord.X - startCoords.RookCoord.X);
-            var kingPiece = GetPieceFromCoord(startCoords.KingCoord);
-            var rookPiece = GetPieceFromCoord(startCoords.RookCoord);
-            CastleCoord endCoords = null;
+            var numXCoordsBetween = Math.Abs(kingCoord.X - rookCoord.X);
 
             //kingside
             if (numXCoordsBetween == 3)
             {
-                if (kingPiece.White)
+                if (pieces.King.White)
                 {
-                    endCoords = new CastleCoord(new Coord(6, 7), new Coord(5, 7));
+                    endCoords = Tuple.Create(new Coord(6, 7), new Coord(5, 7));
                 }
                 else
                 {
-                    endCoords = new CastleCoord(new Coord(6, 0), new Coord(5, 0));
+                    endCoords = Tuple.Create(new Coord(6, 0), new Coord(5, 0));
 
                 }
-
             }
             //queenside
             else if (numXCoordsBetween == 4)
             {
-                if (kingPiece.White)
+                if (pieces.King.White)
                 {
-                    endCoords = new CastleCoord(new Coord(2, 7), new Coord(3, 7));
+                    endCoords = Tuple.Create(new Coord(2, 7), new Coord(3, 7));
                 }
                 else
                 {
-                    endCoords = new CastleCoord(new Coord(2, 0), new Coord(3, 0));
+                    endCoords = Tuple.Create(new Coord(2, 0), new Coord(3, 0));
                 }
 
             }
 
             var moveResult = new MoveResult();
-            moveResult.MovedPiece = kingPiece;
-            var checkListResult1 = this.WouldBeInCheck(moveResult, startCoords.KingCoord, endCoords.KingCoord);
-            moveResult.MovedPiece = rookPiece;
-            var checkListResult2 = this.WouldBeInCheck(moveResult, startCoords.RookCoord, endCoords.RookCoord);
+            moveResult.MovedPiece = pieces.King;
+            var checkListResult1 = this.WouldBeInCheck(moveResult, kingCoord, endCoords.Item1);
+            moveResult.MovedPiece = pieces.Rook;
+            var checkListResult2 = this.WouldBeInCheck(moveResult, rookCoord, endCoords.Item2);
             if (checkListResult1.Count > 0 || checkListResult2.Count > 0)
             {
                 return false;
             }
-            UpdateMap(startCoords.KingCoord, endCoords.KingCoord, kingPiece);
-            UpdateMap(startCoords.RookCoord, endCoords.RookCoord, rookPiece);
 
+            UpdateMap(kingCoord, endCoords.Item1, pieces.King);
+            UpdateMap(rookCoord, endCoords.Item2, pieces.Rook);
             return true;
         }
 

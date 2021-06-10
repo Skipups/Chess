@@ -97,11 +97,6 @@ namespace ChessGame
             return !coord1.Equals(coord2);
         }
 
-
-
-
-
-
         /// <summary>
         /// This returns all elements in the path starting at endpoint1 and ending at endpoint2.
         /// Results include endpoint1 and endpoint2. 
@@ -152,14 +147,14 @@ namespace ChessGame
             return results;
         }
     }
-    public class CastleCoord
+    public class CastlePieces
     {
-        public Coord KingCoord;
-        public Coord RookCoord;
-        public CastleCoord(Coord king, Coord rook)
+        public Piece King;
+        public Piece Rook;
+        public CastlePieces(Piece king, Piece rook)
         {
-            KingCoord = king;
-            RookCoord = rook;
+            King = king;
+            Rook = rook;
         }
     }
 

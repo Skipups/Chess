@@ -15,29 +15,20 @@ namespace ChessGame
     }
     public interface IGameUI
     {
-        Tuple<Coord, Coord> GetMove(GameState gamestate, Player player);
+        Tuple<Piece, Coord> GetMove(GameState gamestate, Player player);
         Piece GetPieceToPromote(GameState gamestate, Player player, List<Piece> capturedPieces);
-
         void DisplayInvalidMove(Player player, string message);
-
         void DisplayCapturedPiece(Piece piece);
-
         void DisplayMoveSuccessful(GameState game, Player player, Coord start, Coord end);
-
         void DisplayGameOver(GameState gamestate, Player player);
-
         void DrawCapturedList(Player player);
         void DisplayNotificationCheckOccured(Player currentPlayerTurn, Player playerInCheck);
-
         void DisplayReminderKingInCheck(Player currentPlayerTurn);
-
         void DisplayCoordsThatHaveKingInCheck(List<Coord> listOfCoordsTheHaveKingInCheck);
-
         bool AskUserAboutCastling(Player player);
         void SaveGame(GameState game);
         string LoadGame(GameState game);
-
-        CastleCoord GetCastlingMove(List<CastleCoord> possibleCastlingOptions);
+        CastlePieces GetCastlingMove(List<CastlePieces> possibleCastlingOptions, GameState game);
     }
     public enum UserAction
     {
@@ -47,7 +38,7 @@ namespace ChessGame
         Quit,
         PlayTurn
     }
-    class GameEngine
+    public class GameEngine
     {
         private readonly IGameEngineUI _gameEngineUI;
         private readonly IGameUI _gameUI;
@@ -60,12 +51,8 @@ namespace ChessGame
 
         public void Run()
         {
-           
             var game = GameState.StartNewGame("Svetlana", "Mike");
-            string moveStatusForDisplay = null;
-
             UserAction userAction = this._gameEngineUI.GetUserAction(game.CurrentTurnPlayer, game);
-
             while(userAction != UserAction.Quit)
             {
                 switch (userAction)
@@ -91,25 +78,18 @@ namespace ChessGame
 
                     case UserAction.LoadGame:
                         var json =  this._gameUI.LoadGame(game);
-                        Console.WriteLine(game.PlayerBlack.Name);
-                        // var model = JObject.Parse(json);
-
-                        // var result = JsonConvert.DeserializeObject(json);
-                        // var result2 = JsonConvert.DeserializeObject(result.ToString());
-                        //game=  JsonConvert.DeserializeObject<GameState>(result2.ToString());
                         game = JsonConvert.DeserializeObject<GameState>(json, new JsonSerializerSettings
                         {
                             TypeNameHandling = TypeNameHandling.Auto
                         });
 
-                        //game = JsonConvert.DeserializeObject<GameState>(json, new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-                        Console.WriteLine(game.PlayerBlack.Name);
+                        game.Board.PopulatePieceToIdMap(game.PlayerWhite.CapturedList, game.PlayerBlack.CapturedList);
+
                         break;
 
                     default:
                         throw new InvalidOperationException();
                 }
-
 
              userAction = this._gameEngineUI.GetUserAction(game.CurrentTurnPlayer, game);
             }

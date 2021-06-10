@@ -57,6 +57,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChessGameLib\ChessGameLib.csproj">
+      <Project>{82206f68-a303-4f0d-8133-461cfde3367f}</Project>
+      <Name>ChessGameLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ChessGame\ChessGame.csproj">
       <Project>{1c1b617b-11ed-4ad7-a5b7-f743fc470d3f}</Project>
       <Name>ChessGame</Name>

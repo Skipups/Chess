@@ -26,7 +26,7 @@ namespace ChessGame
     abstract public class Piece
     {
         [DataMember]
-        public bool White { get; set; }
+        public bool White { get; private set; }
 
         [DataMember]
         public char FirstLetter { get; }
@@ -35,7 +35,7 @@ namespace ChessGame
         public bool HasBeenMoved { get; set; }
 
         [DataMember]
-        public int PieceId { get; }
+        public int PieceId { get; private set; }
 
         [IgnoreDataMember]
         public string DisplayPieceInfo

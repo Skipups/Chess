@@ -12,6 +12,5 @@ namespace ChessGame
         public Piece PawnToPromote;
         public bool GameIsOver;
         public Piece MovedPiece;
-       
     }
 }

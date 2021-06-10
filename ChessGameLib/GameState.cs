@@ -18,7 +18,7 @@ namespace ChessGame
         [IgnoreDataMember]
         public IBoard Board { get { return _board; } }
         [DataMember]
-        public bool TurnWhite;
+        public bool TurnWhite { get; private set; }
 
         [DataMember]
         private Board _board;
@@ -82,18 +82,10 @@ namespace ChessGame
         }
 
         [DataMember]
-        public Guid gameID;
+        public Guid GameID { get; private set; }
 
-        public GameState(string player1Name, string player2Name, Board board)
-        {
-            PlayerWhite = new Player(player1Name, true);
-            PlayerBlack = new Player(player2Name, false);
-            _board = board;
-            TurnWhite = true;
-        }
         private GameState()
-        {
-
+        { 
         }
         public static GameState StartNewGame(string player1Name, string player2Name)
         {
@@ -101,35 +93,15 @@ namespace ChessGame
 
             toReturn.PlayerWhite = new Player(player1Name, true);
             toReturn.PlayerBlack = new Player(player2Name, false);
-            toReturn._board = ChessGame.Board.CreateNewGame();
+            toReturn._board = ChessGame.Board.CreateNewGame(toReturn.PlayerWhite.CapturedList, toReturn.PlayerBlack.CapturedList);
             toReturn.TurnWhite = true;
-            toReturn.gameID = GenerateGuid();
+            toReturn.GameID = Guid.NewGuid();
             return toReturn;
         }
 
-        public static Guid GenerateGuid()
+        public MoveResult Move(Piece piece, Coord end)
         {
-            return new Guid();
-        }
-
-        public void ShowPlayers()
-        {
-                Console.WriteLine($"Player1: {PlayerWhite.Name}, Color:{PlayerWhite.White} and Player2: {PlayerBlack.Name}, Color:{PlayerBlack.White}.");
-        }
-        public void ShowWhoseTurn()
-        {
-            if (TurnWhite)
-            {
-                Console.WriteLine($"{PlayerWhite.Name}'s Turn! Select the white piece you want to move");
-            }
-            else
-            {
-                Console.WriteLine($"{PlayerBlack.Name}'s Turn! Select the black piece you want to move");
-            }
-        }
-        public MoveResult Move(int pieceId, Coord end)
-        {
-            var start = _board.GetStartCoordFromPieceId(pieceId);
+            var start = _board.GetCoordFromPiece(piece);
             var moveResult = _board.Move(start, end);
            
             if (moveResult.CapturedPiece != null)
@@ -144,9 +116,10 @@ namespace ChessGame
                     PlayerWhite.CapturedList.Add(moveResult.CapturedPiece);
                 }
             }
-            return moveResult;
 
+            return moveResult;
         }
+
         public void Promote(Coord end, Piece selectionFromList, MoveResult moveResult)
         {
           
@@ -162,7 +135,6 @@ namespace ChessGame
         }
         public bool PlayTurn(IGameUI gameUI)
         {
-        
             while (true)
             {
                 //currentTurn player in check
@@ -181,12 +153,12 @@ namespace ChessGame
                     gameUI.DisplayCoordsThatHaveKingInCheck(listOfCoordsThatHaveKingInCheck);
                 }
                     //ask user for move
-                    var (coordStart, coordEnd) = gameUI.GetMove(this, CurrentTurnPlayer);
+                    var (piece, coordEnd) = gameUI.GetMove(this, CurrentTurnPlayer);
+                    var startCoord = Board.GetCoordFromPiece(piece);
 
                 try
                 {
-                    var pieceId = _board.GetPieceIdFromCoord(coordStart);
-                    var moveResult = this.Move(pieceId, coordEnd);
+                    var moveResult = this.Move(piece, coordEnd);
                     //check for capture
                     if (moveResult.CapturedPiece != null)
                     {
@@ -211,7 +183,7 @@ namespace ChessGame
                          }
 
                     //display move was successful
-                    gameUI.DisplayMoveSuccessful(this, CurrentTurnPlayer, coordStart, coordEnd);
+                    gameUI.DisplayMoveSuccessful(this, CurrentTurnPlayer, startCoord, coordEnd);
                     this.TurnWhite = !this.TurnWhite;
                     return true;
                 }
@@ -234,7 +206,7 @@ namespace ChessGame
             var possibleCastlingOptions = Board.TryCastle(CurrentTurnPlayer);
             if (possibleCastlingOptions.Count > 0)
             {
-                var coordSelection = gameUI.GetCastlingMove(possibleCastlingOptions);
+                var coordSelection = gameUI.GetCastlingMove(possibleCastlingOptions, this);
                 if (coordSelection != null)
                 {
                     return Board.ExecuteCastlingMove(coordSelection);
