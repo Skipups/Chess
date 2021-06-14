@@ -344,9 +344,9 @@ namespace ChessGame
         {
             string json = JsonConvert.SerializeObject(game, Formatting.Indented, new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Objects,
+
+                TypeNameHandling = TypeNameHandling.Auto,
                 TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-              
 
             });
 
@@ -371,8 +371,7 @@ namespace ChessGame
                 {
                     Console.WriteLine("Saved game with name \"{0}\" already exists. Enter a new name", userInput);
                 }
-            }
-            
+            } 
         }
 
        public string LoadGame(GameState game)

@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>WebChess App</title>
+    <style>
+        td {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            text-align: center;
+            border: 2px solid black;
+        }
+
+        .blackSquare {
+            background-color: grey;
+        }
+        .greenSquare {
+            background-color: #a6ada2;
+        }
+
+        .whitePiece {
+            color: rosybrown;
+        }
+
+        .blackPiece {
+            color: black;
+        }
+        .activePlayer {
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+    <p> <center><h3><font size="20" color="black"> Chess</font></h3></center></p>
+    <div>
+        <center>
+            <div id="playerBlackInfo"></div>
+            <div id="board"></div>
+            <div id="playerWhiteInfo"></div>
+        </center>
+    </div>
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        var uri = 'api/gamestate/ff557f42-5db6-4a3a-bf45-b3566199b93b';
+
+        $(document).ready(function () {
+            var jrequest = $.getJSON(uri, function (data) {
+                var playerWhite = {};
+                var playerBlack = {};
+                var turnWhite;
+                var gameId;
+                var pieces = [];
+                var coordPieceMap = {}; // coord, Piece
+                $.each(data, function (key, val) {
+                    if (key == '_board') {
+                        $.each(data._board.PieceCoordMap, function (coord, val) {
+                            coordPieceMap[coord] = val;
+                        });
+
+                    }
+                    else if (key == 'PlayerWhite') {
+                        playerWhite = val;
+                        console.log("val.name:", val.Name);
+                    }
+                    else if (key == 'PlayerBlack') {
+                        playerBlack = val;
+                    }
+                    else if (key == 'TurnWhite') {
+                        turnWhite = val;
+                    }
+                    else if (key == 'GameID') {
+                        gameId = val;
+                    }
+
+                });
+
+                printBoard(coordPieceMap);
+                printBlackPlayerInfo(playerBlack, turnWhite);
+                printWhitePlayerInfo(playerWhite, turnWhite);
+            });
+
+        });
+
+        function printWhitePlayerInfo(playerWhite, turnWhite)
+        {
+            
+            var infoElement = document.createElement('div');
+            if (playerWhite.White && turnWhite)
+            {
+                infoElement.className = "activePlayer";
+            }
+            infoElement.innerHTML = `White-Player: ${playerWhite.Name}`
+            $("#playerWhiteInfo").append(infoElement);
+        }
+
+        function printBlackPlayerInfo(playerBlack, turnWhite)
+        {
+            var infoElement = document.createElement('div');
+            if (!playerBlack.White && !turnWhite)
+            {
+                infoElement.className = "activePlayer";
+            }
+            infoElement.innerHTML = `Black-Player: ${playerBlack.Name}`
+            $("#playerBlackInfo").append(infoElement);
+        }
+
+        function printBoard(coordPieceMap)
+        {
+            var myTable = $("<table oncontextmenu=\"return false\"></table>").appendTo("#board");
+            var topRow = $("<tr></tr>").appendTo(myTable);
+            var cellElement = document.createElement('td');
+            cellElement.innerHTML = "  ";
+            cellElement.className = "greenSquare";
+            topRow.append(cellElement);
+            for (var row = 0; row < 8; row++)
+            {
+                {
+                    
+                    var cellElement = document.createElement('td');
+                    cellElement.innerHTML = row;
+                    cellElement.className = "greenSquare";
+                    topRow.append(cellElement);
+                }
+                        
+
+                var myRow = $("<tr></tr>").appendTo(myTable);
+                for (var col = 0; col < 8; col++)
+                {
+                    if (col == 0)
+                    {
+                        var cellElement = document.createElement('td');
+                        cellElement.innerHTML = row;
+                        cellElement.className = "greenSquare";
+                        myRow.append(cellElement);
+                    }
+                    var squareColor = "blackSquare"
+                    if ((col + row) % 2 == 0)
+                    {
+                        squareColor = "isWhite";
+                    }
+
+                    var coord = `(${col},${row})`;
+                    var piece = coordPieceMap[coord];
+
+                    // create td element
+                    var cellElement = document.createElement('td');
+                    cellElement.id = coord;
+                    cellElement.className = squareColor;
+                    myRow.append(cellElement);
+
+                    var pieceOrNull;
+
+                    // if there is a piece on the coord, create a piece element
+                    // and append to td of matching coord cell
+                    var pieceElement = document.createElement('div');
+                  
+                    if (piece != undefined) {
+
+                        pieceElement.id = piece.PieceId;
+                        pieceElement.className = piece.White ? "whitePiece" : "blackPiece";
+                        pieceOrNull = piece.FirstLetter;
+
+                    } else {
+                        pieceOrNull = "  ";
+                    }
+                    pieceElement.innerHTML = pieceOrNull;
+                    cellElement.appendChild(pieceElement);
+
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+<!--var pColor = "blackPiece"
+if (val.White)
+{
+    pColor= "whitePiece"
+}
+    //items.push("<li id='" + coord + "'>" + coord.FirstLetter + "</li>");
+capturedListPlayerWhite.push("<div class=" + pColor + " id='" + coord + "'>" + val.FirstLetter + "</div>");
+capturedListPlayerBlack.push()
+//var newElement = document.createElement('div');
+//newElement.id = coord; newElement.className = pColor;
+//newElement.innerHTML = val.FirstLetter;-->
+<!--// document.getElementById(coord).innerHTML = pieceOrNull;
+
+                 // myRow.append("<td class=" + squareColor + " id=\"(" + col + "," + row + ")\">" + pieceOrNull+ "</td>");
+
+
+
+
+
+
+                 //console.log(newElement);
+                 //newElement.innerHTML = val.FirstLetter;
+                 //coordPieceMap[coord] = newElement;-->
+                   <!-- //capturedListPlayerWhite.push("<div class=" + pColor + " id='" + coord + "'>" + val.FirstLetter + "</div>");-->
+
+
+
+
+

@@ -75,7 +75,9 @@ namespace ChessGame
     [DataContract()]
     class Pawn : Piece, IPromotablePiece
     {
+        [DataMember]
         private int moveDirectionMultiplier;
+        [DataMember]
         private int startingY;
 
         public Pawn(bool color, int pieceId) : base(color,'P', pieceId)

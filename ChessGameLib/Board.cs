@@ -18,6 +18,7 @@ namespace ChessGame
         bool ExecuteCastlingMove(CastlePieces startCoord);
         bool CheckMate(Player player);
         void PopulatePieceToIdMap(List<Piece> capturedPieceList1, List<Piece> capturedPieceList2);
+        Piece GetPieceGivenId(int id);
     }
     [DataContract()]
     public class Board : IBoard
@@ -464,6 +465,10 @@ namespace ChessGame
             PieceCoordMap.Add(new Coord(3, 7), new Queen(true, 31));
         }
 
+       public Piece GetPieceGivenId(int id)
+        {
+            return IdPieceMap[id];
+        }
     }
 }
 

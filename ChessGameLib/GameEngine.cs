@@ -12,6 +12,8 @@ namespace ChessGame
     public interface IGameEngineUI
     {
         UserAction GetUserAction(Player player, GameState gameState);
+        void SaveGame(GameState game);
+        string LoadGame(GameState game);
     }
     public interface IGameUI
     {
@@ -26,8 +28,6 @@ namespace ChessGame
         void DisplayReminderKingInCheck(Player currentPlayerTurn);
         void DisplayCoordsThatHaveKingInCheck(List<Coord> listOfCoordsTheHaveKingInCheck);
         bool AskUserAboutCastling(Player player);
-        void SaveGame(GameState game);
-        string LoadGame(GameState game);
         CastlePieces GetCastlingMove(List<CastlePieces> possibleCastlingOptions, GameState game);
     }
     public enum UserAction
@@ -69,7 +69,7 @@ namespace ChessGame
                         break;
 
                     case UserAction.SaveGame:
-                        this._gameUI.SaveGame(game);
+                        this._gameEngineUI.SaveGame(game);
                         break;
 
                     case UserAction.NewGame:
@@ -77,10 +77,11 @@ namespace ChessGame
                         break;
 
                     case UserAction.LoadGame:
-                        var json =  this._gameUI.LoadGame(game);
+                        var json =  this._gameEngineUI.LoadGame(game);
                         game = JsonConvert.DeserializeObject<GameState>(json, new JsonSerializerSettings
                         {
-                            TypeNameHandling = TypeNameHandling.Auto
+                            TypeNameHandling = TypeNameHandling.Auto,
+                            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
                         });
 
                         game.Board.PopulatePieceToIdMap(game.PlayerWhite.CapturedList, game.PlayerBlack.CapturedList);
