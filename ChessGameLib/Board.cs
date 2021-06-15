@@ -245,7 +245,8 @@ namespace ChessGame
             //ask start piece if it can move that many squares
             if (moveResult.MovedPiece != null)
             {
-                if (!moveResult.MovedPiece.ValidateMove(start, end, endPiece))
+                bool isValid = moveResult.MovedPiece.ValidateMove(start, end, endPiece);
+                if (!isValid)
                 {
                     throw new InvalidMoveException("Starting piece can't move that many squares.");
                 }

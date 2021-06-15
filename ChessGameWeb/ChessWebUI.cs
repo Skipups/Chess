@@ -30,7 +30,8 @@ namespace ChessGameWeb
 
         public void DisplayInvalidMove(Player player, string message)
         {
-            throw new ChessWebUIException(400, message);
+            //throw new ChessWebUIException(400, message);
+           
         }
 
         public void DisplayMoveSuccessful(GameState game, Player player, Coord start, Coord end)

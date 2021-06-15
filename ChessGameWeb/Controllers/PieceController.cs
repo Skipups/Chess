@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Results;
 using ChessGame;
+
 
 namespace ChessGameWeb.Controllers
 {
@@ -11,34 +13,40 @@ namespace ChessGameWeb.Controllers
     {
         private GameStateStore Store = new GameStateStore();
 
-        [HttpGet]
+        public class SubmitMoveBody
+        {
+            public int x;
+            public int y;
+            public string playerName;
+        }
+        [HttpPut]
         [Route("api/gamestate/{gameid:guid}/pieces/{pieceid:int}")]
         public GameState UpdatePiece(Guid gameId,
             int pieceId,
-            [FromUri] int x,
-            [FromUri] int y,
-            [FromUri] string playerName)
+            [FromBody] SubmitMoveBody body)
         {
            var loadedGame = Store.Load(gameId);
-           
-            if(loadedGame != null)
-            {
-                if(loadedGame.CurrentTurnPlayer.Name == playerName)
+              if (loadedGame != null)
                 {
-                    var coord = new Coord(x, y);
-                    var piece = loadedGame.Board.GetPieceGivenId(pieceId);
-                    if (piece != null)
+                    if (loadedGame.CurrentTurnPlayer.Name == body.playerName)
                     {
-                        var ui = new ChessWebUI();
-                        ui.PieceToMove = piece;
-                        ui.MoveDestination = coord;
-                        loadedGame.PlayTurn(ui);
-                        Store.Save(loadedGame);
+                        var coord = new Coord(body.x, body.y);
+                        var piece = loadedGame.Board.GetPieceGivenId(pieceId);
+                        if (piece != null)
+                        {
+                            var ui = new ChessWebUI();
+                            ui.PieceToMove = piece;
+                            ui.MoveDestination = coord;
+                            loadedGame.PlayTurn(ui);
+                            Store.Save(loadedGame);
+                        }
                     }
                 }
-            }
 
-            return loadedGame;
+                return loadedGame;
+          
+           
+            
         }
 
         [HttpGet]
